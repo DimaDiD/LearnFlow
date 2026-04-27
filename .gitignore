@@ -427,3 +427,16 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Angular
+node_modules/
+dist/
+.angular/
+
+# Docker / secrets
+.env
+!.env.example
+
+# JetBrains / VS Code
+.idea/
+.vscode/
