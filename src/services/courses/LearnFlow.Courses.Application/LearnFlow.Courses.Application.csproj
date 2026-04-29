@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LearnFlow.Courses.Domain\LearnFlow.Courses.Domain.csproj" />
+    <ProjectReference Include="..\..\..\shared\LearnFlow.Shared.Contracts\LearnFlow.Shared.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
