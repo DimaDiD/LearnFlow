@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LearnFlow.Identity.API/LearnFlow.Identity.API.csproj" />
+  <Project Path="LearnFlow.Identity.Application/LearnFlow.Identity.Application.csproj" />
+  <Project Path="LearnFlow.Identity.Domain/LearnFlow.Identity.Domain.csproj" />
+  <Project Path="LearnFlow.Identity.Infrastructure/LearnFlow.Identity.Infrastructure.csproj" />
+</Solution>

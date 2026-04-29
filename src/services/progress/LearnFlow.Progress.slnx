@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LearnFlow.Progress.API/LearnFlow.Progress.API.csproj" />
+  <Project Path="LearnFlow.Progress.Application/LearnFlow.Progress.Application.csproj" />
+  <Project Path="LearnFlow.Progress.Domain/LearnFlow.Progress.Domain.csproj" />
+  <Project Path="LearnFlow.Progress.Infrastructure/LearnFlow.Progress.Infrastructure.csproj" />
+</Solution>

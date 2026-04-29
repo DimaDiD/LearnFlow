@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LearnFlow.Notifications.API/LearnFlow.Notifications.API.csproj" />
+  <Project Path="LearnFlow.Notifications.Application/LearnFlow.Notifications.Application.csproj" />
+  <Project Path="LearnFlow.Notifications.Domain/LearnFlow.Notifications.Domain.csproj" />
+  <Project Path="LearnFlow.Notifications.Infrastructure/LearnFlow.Notifications.Infrastructure.csproj" />
+</Solution>

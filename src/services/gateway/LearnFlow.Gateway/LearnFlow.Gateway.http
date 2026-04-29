@@ -1,0 +1,6 @@
+@LearnFlow.Gateway_HostAddress = http://localhost:5262
+
+GET {{LearnFlow.Gateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

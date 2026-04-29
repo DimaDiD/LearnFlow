@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LearnFlow.Certificates.API/LearnFlow.Certificates.API.csproj" />
+  <Project Path="LearnFlow.Certificates.Application/LearnFlow.Certificates.Application.csproj" />
+  <Project Path="LearnFlow.Certificates.Domain/LearnFlow.Certificates.Domain.csproj" />
+  <Project Path="LearnFlow.Certificates.Infrastructure/LearnFlow.Certificates.Infrastructure.csproj" />
+</Solution>
