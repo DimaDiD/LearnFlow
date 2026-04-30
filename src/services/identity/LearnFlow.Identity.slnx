@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="../../shared/LearnFlow.Shared.BuildingBlocks/LearnFlow.Shared.BuildingBlocks.csproj" />
+  <Project Path="../../shared/LearnFlow.Shared.Contracts/LearnFlow.Shared.Contracts.csproj" />
   <Project Path="LearnFlow.Identity.API/LearnFlow.Identity.API.csproj" />
   <Project Path="LearnFlow.Identity.Application/LearnFlow.Identity.Application.csproj" />
   <Project Path="LearnFlow.Identity.Domain/LearnFlow.Identity.Domain.csproj" />
