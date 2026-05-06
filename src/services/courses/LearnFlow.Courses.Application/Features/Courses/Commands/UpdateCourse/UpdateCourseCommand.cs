@@ -5,7 +5,7 @@ using MediatR;
 namespace LearnFlow.Courses.Application.Features.Courses.Commands.UpdateCourse;
 
 public record UpdateCourseCommand(
-    [property: JsonIgnore] string CourseId,
+    string CourseId,
     string InstructorId,
     string Title,
     string Description,

@@ -1,4 +1,5 @@
-﻿using LearnFlow.Courses.Application.Features.Courses.Commands.AddLesson;
+﻿using LearnFlow.Courses.API.Controllers.Requests;
+using LearnFlow.Courses.Application.Features.Courses.Commands.AddLesson;
 using LearnFlow.Courses.Application.Features.Courses.Commands.AddModule;
 using LearnFlow.Courses.Application.Features.Courses.Commands.ArchiveCourse;
 using LearnFlow.Courses.Application.Features.Courses.Commands.CreateCourse;
@@ -66,58 +67,73 @@ public class CoursesController : ControllerBase
 
     [HttpPut("{courseId}")]
     public async Task<IActionResult> UpdateCourse(
-        string courseId,
-        [FromBody] UpdateCourseCommand command,
-        CancellationToken ct = default)
+    string courseId,
+    [FromBody] UpdateCourseRequest request,
+    CancellationToken ct = default)
     {
-        // Ensure courseId from route matches command
-        var updatedCommand = command with { CourseId = courseId };
-        await _mediator.Send(updatedCommand, ct);
+        await _mediator.Send(new UpdateCourseCommand(
+            courseId,
+            request.InstructorId,
+            request.Title,
+            request.Description,
+            request.Category,
+            request.Level,
+            request.Tags,
+            request.Price), ct);
         return NoContent();
     }
 
     [HttpPost("{courseId}/modules")]
     public async Task<IActionResult> AddModule(
-        string courseId,
-        [FromBody] AddModuleCommand command,
-        CancellationToken ct = default)
+    string courseId,
+    [FromBody] AddModuleRequest request,
+    CancellationToken ct = default)
     {
-        var updatedCommand = command with { CourseId = courseId };
-        var moduleId = await _mediator.Send(updatedCommand, ct);
+        var moduleId = await _mediator.Send(new AddModuleCommand(
+            courseId,
+            request.InstructorId,
+            request.Title,
+            request.Description,
+            request.Order), ct);
         return StatusCode(201, new { moduleId });
     }
 
     [HttpPost("{courseId}/modules/{moduleId}/lessons")]
     public async Task<IActionResult> AddLesson(
-        string courseId,
-        string moduleId,
-        [FromBody] AddLessonCommand command,
-        CancellationToken ct = default)
+    string courseId,
+    string moduleId,
+    [FromBody] AddLessonRequest request,
+    CancellationToken ct = default)
     {
-        var updatedCommand = command with { CourseId = courseId, ModuleId = moduleId };
-        var lessonId = await _mediator.Send(updatedCommand, ct);
+        var lessonId = await _mediator.Send(new AddLessonCommand(
+            courseId,
+            moduleId,
+            request.InstructorId,
+            request.Title,
+            request.Description,
+            request.VideoUrl,
+            request.DurationMinutes,
+            request.Order), ct);
         return StatusCode(201, new { lessonId });
     }
 
     [HttpPost("{courseId}/publish")]
     public async Task<IActionResult> PublishCourse(
-        string courseId,
-        [FromBody] PublishCourseCommand command,
-        CancellationToken ct = default)
+    string courseId,
+    [FromBody] PublishCourseRequest request,
+    CancellationToken ct = default)
     {
-        var updatedCommand = command with { CourseId = courseId };
-        await _mediator.Send(updatedCommand, ct);
+        await _mediator.Send(new PublishCourseCommand(courseId, request.InstructorId), ct);
         return NoContent();
     }
 
     [HttpPost("{courseId}/archive")]
     public async Task<IActionResult> ArchiveCourse(
-        string courseId,
-        [FromBody] ArchiveCourseCommand command,
-        CancellationToken ct = default)
+    string courseId,
+    [FromBody] ArchiveCourseRequest request,
+    CancellationToken ct = default)
     {
-        var updatedCommand = command with { CourseId = courseId };
-        await _mediator.Send(updatedCommand, ct);
+        await _mediator.Send(new ArchiveCourseCommand(courseId, request.InstructorId), ct);
         return NoContent();
     }
 }

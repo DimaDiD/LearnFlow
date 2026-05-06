@@ -4,7 +4,7 @@ using MediatR;
 namespace LearnFlow.Courses.Application.Features.Courses.Commands.AddModule;
 
 public record AddModuleCommand(
-    [property: JsonIgnore] string CourseId,
+    string CourseId,
     string InstructorId,
     string Title,
     string Description,

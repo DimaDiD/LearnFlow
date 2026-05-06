@@ -1,4 +1,6 @@
 ﻿using LearnFlow.Courses.Application.Common.Interfaces;
+using LearnFlow.Shared.Contracts.Events.Courses;
+using MassTransit;
 using MediatR;
 
 namespace LearnFlow.Courses.Application.Features.Courses.Commands.PublishCourse;
@@ -6,10 +8,14 @@ namespace LearnFlow.Courses.Application.Features.Courses.Commands.PublishCourse;
 public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
 {
     private readonly ICourseRepository _courseRepository;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public PublishCourseCommandHandler(ICourseRepository courseRepository)
+    public PublishCourseCommandHandler(
+        ICourseRepository courseRepository,
+        IPublishEndpoint publishEndpoint)
     {
         _courseRepository = courseRepository;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task Handle(PublishCourseCommand command, CancellationToken ct)
@@ -24,6 +30,16 @@ public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
 
         await _courseRepository.UpdateAsync(course, ct);
 
-        // TODO Phase 3 step 5: publish CoursePublishedEvent to RabbitMQ here
+        await _publishEndpoint.Publish(new CoursePublishedEvent
+        {
+            CourseId = course.Id,
+            InstructorId = course.InstructorId,
+            Title = course.Title,
+            Description = course.Description,
+            Category = course.Category,
+            Level = course.Level.ToString(),
+            Tags = course.Tags,
+            PublishedAt = course.PublishedAt!.Value
+        }, ct);
     }
 }
