@@ -2,6 +2,7 @@
 using LearnFlow.Identity.Application.DTOs.Auth;
 using LearnFlow.Identity.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace LearnFlow.Identity.Application.Features.Auth.Commands.Login;
 
@@ -10,15 +11,18 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtService _jwtService;
+    private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
-        IJwtService jwtService)
+        IJwtService jwtService,
+        ILogger<LoginCommandHandler> logger)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtService = jwtService;
+        _logger = logger;
     }
 
     public async Task<AuthResponseDto> Handle(LoginCommand command, CancellationToken ct)
@@ -37,6 +41,11 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
         
         var refreshToken = RefreshToken.Create(user.Id, refreshTokenHash);
         await _refreshTokenRepository.InsertAsync(refreshToken, ct);
+
+        _logger.LogInformation(
+            "User logged in: {UserId} {Email}",
+            user.Id,
+            user.Email);
 
         return new AuthResponseDto(
             accessToken,

@@ -2,6 +2,7 @@
 using LearnFlow.Shared.Contracts.Events.Courses;
 using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace LearnFlow.Courses.Application.Features.Courses.Commands.PublishCourse;
 
@@ -9,13 +10,16 @@ public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<PublishCourseCommandHandler> _logger;
 
     public PublishCourseCommandHandler(
         ICourseRepository courseRepository,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        ILogger<PublishCourseCommandHandler> logger)
     {
         _courseRepository = courseRepository;
         _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
 
     public async Task Handle(PublishCourseCommand command, CancellationToken ct)
@@ -27,8 +31,12 @@ public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
             throw new UnauthorizedAccessException("You can only publish your own courses.");
 
         course.Publish();
-
         await _courseRepository.UpdateAsync(course, ct);
+
+        _logger.LogInformation(
+            "Course {CourseId} published by instructor {InstructorId}",
+            course.Id,
+            course.InstructorId);
 
         await _publishEndpoint.Publish(new CoursePublishedEvent
         {
@@ -41,5 +49,9 @@ public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
             Tags = course.Tags,
             PublishedAt = course.PublishedAt!.Value
         }, ct);
+
+        _logger.LogInformation(
+            "CoursePublishedEvent sent for course {CourseId}",
+            course.Id);
     }
 }

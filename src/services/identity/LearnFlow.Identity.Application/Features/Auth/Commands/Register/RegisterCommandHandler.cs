@@ -2,6 +2,7 @@
 using LearnFlow.Identity.Application.DTOs.Auth;
 using LearnFlow.Identity.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace LearnFlow.Identity.Application.Features.Auth.Commands.Register;
 
@@ -10,15 +11,18 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtService _jwtService;
+    private readonly ILogger<RegisterCommandHandler> _logger;
 
     public RegisterCommandHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
-        IJwtService jwtService)
+        IJwtService jwtService,
+        ILogger<RegisterCommandHandler> logger)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtService = jwtService;
+        _logger = logger;
     }
 
     public async Task<AuthResponseDto> Handle(RegisterCommand command, CancellationToken ct)
@@ -44,6 +48,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
 
         var refreshToken = RefreshToken.Create(user.Id, refreshTokenHash);
         await _refreshTokenRepository.InsertAsync(refreshToken, ct);
+
+        _logger.LogInformation(
+            "User registered: {UserId} {Email} {Role}",
+            user.Id,
+            user.Email, 
+            user.Role);
 
         return new AuthResponseDto(
             accessToken,
