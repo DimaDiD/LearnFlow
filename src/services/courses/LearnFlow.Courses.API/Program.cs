@@ -34,7 +34,12 @@ try
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Service} | {Message:lj}{NewLine}{Exception}")
         .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:8081"));
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
     builder.Services.AddHealthChecks()
         .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" })
