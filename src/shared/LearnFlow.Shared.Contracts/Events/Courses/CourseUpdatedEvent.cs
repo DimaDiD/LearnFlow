@@ -9,4 +9,5 @@ public record CourseUpdatedEvent
     public string Level { get; init; } = string.Empty;
     public List<string> Tags { get; init; } = new();
     public DateTime UpdatedAt { get; init; }
+    public List<CourseModuleContract> Modules { get; init; } = new();
 }

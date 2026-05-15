@@ -47,7 +47,12 @@ public class PublishCourseCommandHandler : IRequestHandler<PublishCourseCommand>
             Category = course.Category,
             Level = course.Level.ToString(),
             Tags = course.Tags,
-            PublishedAt = course.PublishedAt!.Value
+            PublishedAt = course.PublishedAt!.Value,
+            Modules = course.Modules.Select(m => new CourseModuleContract
+            {
+                ModuleId = m.Id,
+                LessonIds = m.Lessons.Select(l => l.Id).ToList()
+            }).ToList()
         }, ct);
 
         _logger.LogInformation(
