@@ -1,6 +1,8 @@
 ﻿using LearnFlow.Identity.Application.Common.Interfaces;
+using LearnFlow.Identity.Infrastructure.Persistence;
 using LearnFlow.Identity.Infrastructure.Persistence.Repositories;
 using LearnFlow.Identity.Infrastructure.Security;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -14,7 +16,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // MongoDB
-        services.AddSingleton<IMongoClient>(_ => new MongoClient(configuration.GetConnectionString("MongoDB")));
+        services.AddSingleton<IMongoClient>(_ =>
+            new MongoClient(configuration.GetConnectionString("MongoDB")));
 
         services.AddScoped<IMongoDatabase>(sp =>
             sp.GetRequiredService<IMongoClient>()
@@ -27,6 +30,21 @@ public static class DependencyInjection
 
         // Services
         services.AddScoped<IJwtService, JwtService>();
+
+        // MassTransit + RabbitMQ
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(configuration["RabbitMQ:Host"], "learnflow", h =>
+                {
+                    h.Username(configuration["RabbitMQ:Username"]!);
+                    h.Password(configuration["RabbitMQ:Password"]!);
+                });
+
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
 
         return services;
     }

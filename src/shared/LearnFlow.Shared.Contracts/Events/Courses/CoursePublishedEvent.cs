@@ -20,3 +20,5 @@ public record CourseModuleContract
     public string ModuleId { get; init; } = string.Empty;
     public List<string> LessonIds { get; init; } = new();
 }
+
+        

@@ -1,6 +1,8 @@
 ﻿using LearnFlow.Identity.Application.Common.Interfaces;
 using LearnFlow.Identity.Application.DTOs.Auth;
 using LearnFlow.Identity.Domain.Entities;
+using LearnFlow.Shared.Contracts.Events.Identity;
+using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,17 +14,20 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtService _jwtService;
     private readonly ILogger<RegisterCommandHandler> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public RegisterCommandHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtService jwtService,
-        ILogger<RegisterCommandHandler> logger)
+        ILogger<RegisterCommandHandler> logger,
+        IPublishEndpoint publishEndpoint)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtService = jwtService;
         _logger = logger;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<AuthResponseDto> Handle(RegisterCommand command, CancellationToken ct)
@@ -41,6 +46,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             command.Role);
 
         await _userRepository.InsertAsync(user, ct);
+
+        await _publishEndpoint.Publish(new UserRegisteredEvent
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = user.Role.ToString()
+        });
 
         var accessToken = _jwtService.GenerateAccessToken(user);
         var rawRefreshToken = _jwtService.GenerateRefreshToken();

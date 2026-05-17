@@ -3,6 +3,7 @@
 public record CourseUpdatedEvent
 {
     public string CourseId { get; init; } = string.Empty;
+    public string InstructorId { get; init; } = string.Empty;
     public string Title { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public string Category { get; init; } = string.Empty;
