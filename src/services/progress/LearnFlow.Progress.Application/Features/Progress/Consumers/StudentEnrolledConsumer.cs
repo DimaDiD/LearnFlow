@@ -57,6 +57,7 @@ public class StudentEnrolledConsumer : IConsumer<StudentEnrolledEvent>
         var progress = Domain.Entities.Progress.Create(
             message.StudentId,
             message.CourseId,
+            message.CourseTitleSnapshot,
             modules);
 
         await _progressRepository.InsertAsync(progress, context.CancellationToken);

@@ -52,7 +52,7 @@ public class MarkLessonCompleteCommandHandler : IRequestHandler<MarkLessonComple
                 ProgressId = progress.Id,
                 StudentId = progress.StudentId,
                 CourseId = progress.CourseId,
-                CourseTitleSnapshot = string.Empty,
+                CourseTitleSnapshot = progress.CourseTitleSnapshot,
                 CompletedAt = progress.CompletedAt!.Value
             }, ct);
 

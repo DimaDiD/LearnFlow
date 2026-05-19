@@ -31,6 +31,9 @@ public class Progress
     [BsonElement("completedLessonsCount")]
     public int CompletedLessonsCount { get; private set; }
 
+    [BsonElement("courseTitleSnapshot")]
+    public string CourseTitleSnapshot { get; private set; } = string.Empty;
+
     [BsonElement("moduleProgresses")]
     public List<ModuleProgress> ModuleProgresses { get; private set; }
 
@@ -48,6 +51,7 @@ public class Progress
     public static Progress Create(
         string studentId,
         string courseId,
+        string courseTitleSnapshot,
         List<(string ModuleId, List<string> LessonIds)> modules)
     {
         var moduleProgresses = modules
