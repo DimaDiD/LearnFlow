@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>My Courses</h1>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="courses-grid" *ngIf="!loading">
+    <mat-card *ngFor="let item of coursesWithProgress" class="course-card">
+      <mat-card-header>
+        <mat-card-title>{{ item.enrollment.courseTitleSnapshot }}</mat-card-title>
+        <mat-card-subtitle>
+          Status: {{ item.enrollment.status }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div *ngIf="item.progress">
+          <p>Progress: {{ item.progress.completionPercentage }}%</p>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="item.progress.completionPercentage">
+          </mat-progress-bar>
+          <p>{{ item.progress.completedLessonsCount }} / {{ item.progress.totalLessons }} lessons completed</p>
+          <p *ngIf="item.progress.status === 'Completed'" class="completed-badge">
+            ✅ Completed!
+          </p>
+        </div>
+        <div *ngIf="!item.progress">
+          <p>Loading progress...</p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary"
+                [routerLink]="['/courses', item.enrollment.courseId]">
+          Continue Learning
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <p *ngIf="coursesWithProgress.length === 0">
+      You are not enrolled in any courses yet.
+      <a routerLink="/courses">Browse courses</a>
+    </p>
+  </div>
+</div>

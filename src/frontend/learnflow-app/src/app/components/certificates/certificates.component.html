@@ -1,0 +1,34 @@
+<p>certificates works!</p>
+<div class="container">
+  <h1>My Certificates</h1>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="certificates-grid" *ngIf="!loading">
+    <mat-card *ngFor="let cert of certificates" class="cert-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="cert-icon">workspace_premium</mat-icon>
+        <mat-card-title>{{ cert.courseTitleSnapshot || 'Course Certificate' }}</mat-card-title>
+        <mat-card-subtitle>{{ cert.certificateNumber }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p><strong>Issued:</strong> {{ cert.issuedAt | date:'mediumDate' }}</p>
+        <p><strong>Completion:</strong> {{ cert.completionPercentage }}%</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-stroked-button color="primary">
+          <mat-icon>share</mat-icon>
+          Share
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <p *ngIf="certificates.length === 0">
+      No certificates yet. Complete a course to earn your first certificate!
+    </p>
+  </div>
+</div>

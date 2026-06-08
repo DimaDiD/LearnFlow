@@ -34,12 +34,22 @@ try
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Service} | {Message:lj}{NewLine}{Exception}")
         .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:8081"));
 
-    builder.Services.AddControllers()
-    .AddJsonOptions(options =>
+    builder.Services.AddCors(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(
-            new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
     });
+
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(
+                new System.Text.Json.Serialization.JsonStringEnumConverter());
+        });
 
     builder.Services.AddHealthChecks()
         .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" })
@@ -83,6 +93,8 @@ try
             diagnosticContext.Set("CorrelationId", httpContext.Response.Headers["X-Correlation-Id"].ToString());
         };
     });
+
+    app.UseCors();
 
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 

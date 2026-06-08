@@ -1,13 +1,14 @@
 using LearnFlow.Certificates.API.Middleware;
 using LearnFlow.Certificates.Application.Common.Behaviors;
 using LearnFlow.Certificates.Application.Common.Mappers;
+using LearnFlow.Certificates.Infrastructure;
 using LearnFlow.Certificates.Infrastructure.Persistence;
+using LearnFlow.Notifications.Application.Features.Certificates.Queries.GetMyCertificates;
 using MediatR;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
-using LearnFlow.Certificates.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -32,6 +33,17 @@ try
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Service} | {Message:lj}{NewLine}{Exception}")
         .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:8081"));
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+
+
     builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -54,6 +66,9 @@ try
             failureStatus: HealthStatus.Degraded,
             tags: new[] { "ready", "messaging" },
             timeout: TimeSpan.FromSeconds(3));
+
+    builder.Services.AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssembly(typeof(GetMyCertificatesQuery).Assembly));
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
@@ -78,6 +93,8 @@ try
             diagnosticContext.Set("CorrelationId", httpContext.Response.Headers["X-Correlation-Id"].ToString());
         };
     });
+
+    app.UseCors();
 
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 

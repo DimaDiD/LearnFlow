@@ -1,0 +1,8 @@
+**/.vs
+**/.git
+**/bin
+**/obj
+**/*.user
+**/node_modules
+**/dist
+nuget.config

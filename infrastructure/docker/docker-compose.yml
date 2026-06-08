@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # ─── Infrastructure ───────────────────────────────────────────
   mongodb:
     image: mongo:7.0
     container_name: learnflow-mongodb
@@ -64,19 +65,6 @@ services:
     networks:
       - learnflow-network
 
-  # kibana:
-  #   image: kibana:8.13.0
-  #   container_name: learnflow-kibana
-  #   restart: unless-stopped
-  #   environment:
-  #     ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-  #   ports:
-  #     - "5601:5601"
-  #   depends_on:
-  #     - elasticsearch
-  #   networks:
-  #     - learnflow-network
-
   seq:
     image: datalust/seq:2024.1
     container_name: learnflow-seq
@@ -98,6 +86,206 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    networks:
+      - learnflow-network
+
+  # ─── Backend Services ─────────────────────────────────────────
+  identity-service:
+    build:
+      context: ../..
+      dockerfile: src/services/identity/Dockerfile
+    container_name: learnflow-identity
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://identity_user:service_password_123@mongodb:27017/learnflow_identity
+      MongoDB__DatabaseName: learnflow_identity
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Jwt__SecretKey: ${JWT_SECRET_KEY}
+      Jwt__Issuer: LearnFlow.Identity
+      Jwt__Audience: LearnFlow
+      Seq__Url: http://seq:80
+    ports:
+      - "5128:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - learnflow-network
+
+  courses-service:
+    build:
+      context: ../..
+      dockerfile: src/services/courses/Dockerfile
+    container_name: learnflow-courses
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://courses_user:service_password_123@mongodb:27017/learnflow_courses
+      MongoDB__DatabaseName: learnflow_courses
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Seq__Url: http://seq:80
+    ports:
+      - "5269:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - learnflow-network
+
+  enrollments-service:
+    build:
+      context: ../..
+      dockerfile: src/services/enrollments/Dockerfile
+    container_name: learnflow-enrollments
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://enrollments_user:service_password_123@mongodb:27017/learnflow_enrollments
+      MongoDB__DatabaseName: learnflow_enrollments
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      CourseService__BaseUrl: http://courses-service:8080
+      Seq__Url: http://seq:80
+    ports:
+      - "5145:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - courses-service
+    networks:
+      - learnflow-network
+
+  progress-service:
+    build:
+      context: ../..
+      dockerfile: src/services/progress/Dockerfile
+    container_name: learnflow-progress
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://progress_user:service_password_123@mongodb:27017/learnflow_progress
+      MongoDB__DatabaseName: learnflow_progress
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Seq__Url: http://seq:80
+    ports:
+      - "5134:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - learnflow-network
+
+  certificates-service:
+    build:
+      context: ../..
+      dockerfile: src/services/certificates/Dockerfile
+    container_name: learnflow-certificates
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://certificates_user:service_password_123@mongodb:27017/learnflow_certificates
+      MongoDB__DatabaseName: learnflow_certificates
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Seq__Url: http://seq:80
+    ports:
+      - "5059:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - learnflow-network
+
+  search-service:
+    build:
+      context: ../..
+      dockerfile: src/services/search/Dockerfile
+    container_name: learnflow-search
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Elasticsearch__Url: http://elasticsearch:9200
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Seq__Url: http://seq:80
+    ports:
+      - "5217:8080"
+    depends_on:
+      - elasticsearch
+      - rabbitmq
+    networks:
+      - learnflow-network
+
+  notifications-service:
+    build:
+      context: ../..
+      dockerfile: src/services/notifications/Dockerfile
+    container_name: learnflow-notifications
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__MongoDB: mongodb://notifications_user:service_password_123@mongodb:27017/learnflow_notifications
+      MongoDB__DatabaseName: learnflow_notifications
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Email__SmtpHost: mailhog
+      Email__SmtpPort: 1025
+      Email__FromEmail: noreply@learnflow.com
+      Email__FromName: LearnFlow
+      Seq__Url: http://seq:80
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - mailhog
+    networks:
+      - learnflow-network
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: src/services/gateway/Dockerfile
+    container_name: learnflow-gateway
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Jwt__SecretKey: ${JWT_SECRET_KEY}
+      Jwt__Issuer: LearnFlow.Identity
+      Jwt__Audience: LearnFlow
+      Seq__Url: http://seq:80
+      ReverseProxy__Clusters__identity-cluster__Destinations__destination1__Address: http://identity-service:8080
+      ReverseProxy__Clusters__courses-cluster__Destinations__destination1__Address: http://courses-service:8080
+      ReverseProxy__Clusters__enrollments-cluster__Destinations__destination1__Address: http://enrollments-service:8080
+      ReverseProxy__Clusters__progress-cluster__Destinations__destination1__Address: http://progress-service:8080
+      ReverseProxy__Clusters__certificates-cluster__Destinations__destination1__Address: http://certificates-service:8080
+      ReverseProxy__Clusters__search-cluster__Destinations__destination1__Address: http://search-service:8080
+    ports:
+      - "5262:8080"
+    depends_on:
+      - identity-service
+      - courses-service
+      - enrollments-service
+      - progress-service
+      - certificates-service
+      - search-service
     networks:
       - learnflow-network
 

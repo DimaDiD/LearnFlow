@@ -1,0 +1,52 @@
+<div class="container">
+  <h1>Course Catalog</h1>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <mat-form-field appearance="outline" class="search-input">
+      <mat-label>Search courses...</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="onSearch()">Search</button>
+  </div>
+
+  <!-- Categories -->
+  <div class="categories">
+    <button mat-stroked-button
+            *ngFor="let cat of categories"
+            [color]="selectedCategory === cat ? 'primary' : ''"
+            (click)="selectCategory(cat)">
+      {{ cat }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Courses Grid -->
+  <div class="courses-grid" *ngIf="!loading">
+    <mat-card *ngFor="let course of courses" class="course-card">
+      <mat-card-header>
+        <mat-card-title>{{ course.title }}</mat-card-title>
+        <mat-card-subtitle>{{ course.category }} • {{ course.level }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>{{ course.description | slice:0:100 }}...</p>
+        <p><strong>Instructor:</strong> {{ course.instructorName || 'Unknown' }}</p>
+        <p><strong>Lessons:</strong> {{ course.enrollmentCount }} enrolled</p>
+        <p><strong>Price:</strong> {{ course.price === 0 ? 'Free' : '$' + course.price }}</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" [routerLink]="['/courses', course.id]">
+          View Course
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <p *ngIf="courses.length === 0">No courses found.</p>
+  </div>
+</div>

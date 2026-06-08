@@ -1,34 +1,100 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
+using System.Security.Claims;
+using System.Text;
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
+try
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    Log.Information("Starting API Gateway...");
 
-app.MapGet("/weatherforecast", () =>
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("Service", "api-gateway")
+        .WriteTo.Console(outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {Service} | {Message:lj}{NewLine}{Exception}")
+        .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:8081"));
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+            };
+        });
+
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddReverseProxy()
+        .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+    var app = builder.Build();
+
+    app.UseCors();
+
+    app.UseSerilogRequestLogging();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.Use(async (context, next) =>
+    {
+        if (context.User.Identity?.IsAuthenticated == true)
+        {
+            var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? context.User.FindFirst("sub")?.Value;
+            var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value
+                        ?? context.User.FindFirst("role")?.Value;
+
+            if (userId != null)
+                context.Request.Headers["X-User-Id"] = userId;
+
+            if (userRole != null)
+                context.Request.Headers["X-User-Role"] = userRole;
+        }
+
+        await next();
+    });
+
+    app.MapReverseProxy();
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+    Log.Fatal(ex, "API Gateway failed to start.");
+}
+finally
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Log.CloseAndFlush();
 }

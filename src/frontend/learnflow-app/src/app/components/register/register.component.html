@@ -1,0 +1,54 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Create Account</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName">
+          <mat-error *ngIf="form.get('firstName')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName">
+          <mat-error *ngIf="form.get('lastName')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email">
+          <mat-error *ngIf="form.get('email')?.hasError('required')">Required</mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">Invalid email</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password">
+          <mat-error *ngIf="form.get('password')?.hasError('required')">Required</mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('minlength')">Min 8 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option [value]="0">Student</mat-option>
+            <mat-option [value]="1">Instructor</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="loading || form.invalid" class="full-width">
+          {{ loading ? 'Creating account...' : 'Register' }}
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <p>Already have an account? <a routerLink="/login">Login</a></p>
+    </mat-card-actions>
+  </mat-card>
+</div>

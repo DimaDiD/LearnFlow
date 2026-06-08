@@ -1,0 +1,18 @@
+<mat-toolbar color="primary">
+  <span routerLink="/courses" style="cursor:pointer">LearnFlow</span>
+  <span class="spacer"></span>
+
+  <ng-container *ngIf="authService.isLoggedIn()">
+    <button mat-button routerLink="/courses">Courses</button>
+    <button mat-button routerLink="/my-courses">My Courses</button>
+    <button mat-button routerLink="/certificates">Certificates</button>
+    <button mat-button (click)="logout()">Logout</button>
+  </ng-container>
+
+  <ng-container *ngIf="!authService.isLoggedIn()">
+    <button mat-button routerLink="/login">Login</button>
+    <button mat-button routerLink="/register">Register</button>
+  </ng-container>
+</mat-toolbar>
+
+<router-outlet></router-outlet>

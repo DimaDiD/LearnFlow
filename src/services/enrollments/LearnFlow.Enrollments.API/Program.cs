@@ -33,6 +33,16 @@ try
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Service} | {Message:lj}{NewLine}{Exception}")
         .WriteTo.Seq(context.Configuration["Seq:Url"] ?? "http://localhost:8081"));
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
@@ -75,6 +85,7 @@ try
         app.UseSwaggerUI();
     }
 
+    app.UseCors();
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseSerilogRequestLogging(options =>
     {

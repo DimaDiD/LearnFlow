@@ -1,0 +1,43 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.course-header {
+  margin-bottom: 24px;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+.tag {
+  background: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.lesson-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.duration {
+  margin-left: auto;
+  color: #666;
+  font-size: 12px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}

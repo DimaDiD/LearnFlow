@@ -1,0 +1,50 @@
+<div class="container">
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="course && !loading">
+    <mat-card class="course-header">
+      <mat-card-header>
+        <mat-card-title>{{ course.title }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ course.category }} • {{ course.level }} •
+          {{ course.totalLessons }} lessons
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>{{ course.description }}</p>
+        <div class="tags">
+          <span *ngFor="let tag of course.tags" class="tag">{{ tag }}</span>
+        </div>
+        <p><strong>Price:</strong> {{ course.price === 0 ? 'Free' : '$' + course.price }}</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary"
+                (click)="enroll()"
+                [disabled]="enrolling">
+          {{ enrolling ? 'Enrolling...' : 'Enroll Now' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Modules -->
+    <h2>Course Content</h2>
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let module of course.modules">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ module.title }}</mat-panel-title>
+          <mat-panel-description>{{ module.lessons.length }} lessons</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div *ngFor="let lesson of module.lessons" class="lesson-item">
+          <mat-icon>play_circle_outline</mat-icon>
+          <span>{{ lesson.title }}</span>
+          <span class="duration">{{ lesson.durationMinutes }} min</span>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>
