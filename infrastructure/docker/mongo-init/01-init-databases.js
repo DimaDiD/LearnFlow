@@ -6,6 +6,8 @@ const databases = [
   { name: 'learnflow_enrollments', user: 'enrollments_user' },
   { name: 'learnflow_progress', user: 'progress_user' },
   { name: 'learnflow_certificates', user: 'certificates_user' },
+  { name: 'learnflow_notifications', user: 'notifications_user' },
+  { name: 'learnflow_search', user: 'search_user' },
 ];
 
 const password = 'service_password_123';
