@@ -8,11 +8,100 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20'
 
 jobs:
-  build-identity:
-    name: Build Identity Service
+  detect-changes:
+    name: Detect Changed Services
     runs-on: ubuntu-latest
+    outputs:
+      identity: ${{ steps.changes.outputs.identity }}
+      courses: ${{ steps.changes.outputs.courses }}
+      enrollments: ${{ steps.changes.outputs.enrollments }}
+      progress: ${{ steps.changes.outputs.progress }}
+      certificates: ${{ steps.changes.outputs.certificates }}
+      search: ${{ steps.changes.outputs.search }}
+      notifications: ${{ steps.changes.outputs.notifications }}
+      gateway: ${{ steps.changes.outputs.gateway }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            identity:
+              - 'src/services/identity/**'
+              - 'src/shared/**'
+            courses:
+              - 'src/services/courses/**'
+              - 'src/shared/**'
+            enrollments:
+              - 'src/services/enrollments/**'
+              - 'src/shared/**'
+            progress:
+              - 'src/services/progress/**'
+              - 'src/shared/**'
+            certificates:
+              - 'src/services/certificates/**'
+              - 'src/shared/**'
+            search:
+              - 'src/services/search/**'
+              - 'src/shared/**'
+            notifications:
+              - 'src/services/notifications/**'
+              - 'src/shared/**'
+            gateway:
+              - 'src/services/gateway/**'
+            frontend:
+              - 'src/frontend/**'
+
+  build-backend:
+    name: Build ${{ matrix.service.display_name }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs[matrix.service.name] == 'true' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop'
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: identity
+            display_name: Identity Service
+            path: src/services/identity
+            project: LearnFlow.Identity.API
+          - name: courses
+            display_name: Courses Service
+            path: src/services/courses
+            project: LearnFlow.Courses.API
+          - name: enrollments
+            display_name: Enrollments Service
+            path: src/services/enrollments
+            project: LearnFlow.Enrollments.API
+          - name: progress
+            display_name: Progress Service
+            path: src/services/progress
+            project: LearnFlow.Progress.API
+          - name: certificates
+            display_name: Certificates Service
+            path: src/services/certificates
+            project: LearnFlow.Certificates.API
+          - name: search
+            display_name: Search Service
+            path: src/services/search
+            project: LearnFlow.Search.API
+          - name: notifications
+            display_name: Notifications Service
+            path: src/services/notifications
+            project: LearnFlow.Notifications.API
+          - name: gateway
+            display_name: API Gateway
+            path: src/services/gateway
+            project: LearnFlow.Gateway
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,165 +110,47 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
-        run: dotnet restore src/services/identity/LearnFlow.Identity.API/LearnFlow.Identity.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/identity/LearnFlow.Identity.API/LearnFlow.Identity.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/identity/Dockerfile -t learnflow-identity:ci .
-
-  build-courses:
-    name: Build Courses Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ matrix.service.name }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-${{ matrix.service.name }}-
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore src/services/courses/LearnFlow.Courses.API/LearnFlow.Courses.API.csproj
+        run: dotnet restore ${{ matrix.service.path }}/${{ matrix.service.project }}/${{ matrix.service.project }}.csproj
 
       - name: Build
-        run: dotnet build src/services/courses/LearnFlow.Courses.API/LearnFlow.Courses.API.csproj --no-restore --configuration Release
+        run: |
+          dotnet build ${{ matrix.service.path }}/${{ matrix.service.project }}/${{ matrix.service.project }}.csproj \
+            --no-restore \
+            --configuration Release
 
       - name: Docker build check
-        run: docker build -f src/services/courses/Dockerfile -t learnflow-courses:ci .
-
-  build-enrollments:
-    name: Build Enrollments Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/enrollments/LearnFlow.Enrollments.API/LearnFlow.Enrollments.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/enrollments/LearnFlow.Enrollments.API/LearnFlow.Enrollments.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/enrollments/Dockerfile -t learnflow-enrollments:ci .
-
-  build-progress:
-    name: Build Progress Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/progress/LearnFlow.Progress.API/LearnFlow.Progress.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/progress/LearnFlow.Progress.API/LearnFlow.Progress.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/progress/Dockerfile -t learnflow-progress:ci .
-
-  build-certificates:
-    name: Build Certificates Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/certificates/LearnFlow.Certificates.API/LearnFlow.Certificates.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/certificates/LearnFlow.Certificates.API/LearnFlow.Certificates.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/certificates/Dockerfile -t learnflow-certificates:ci .
-
-  build-search:
-    name: Build Search Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/search/LearnFlow.Search.API/LearnFlow.Search.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/search/LearnFlow.Search.API/LearnFlow.Search.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/search/Dockerfile -t learnflow-search:ci .
-
-  build-notifications:
-    name: Build Notifications Service
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/notifications/LearnFlow.Notifications.API/LearnFlow.Notifications.API.csproj
-
-      - name: Build
-        run: dotnet build src/services/notifications/LearnFlow.Notifications.API/LearnFlow.Notifications.API.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/notifications/Dockerfile -t learnflow-notifications:ci .
-
-  build-gateway:
-    name: Build API Gateway
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore src/services/gateway/LearnFlow.Gateway/LearnFlow.Gateway.csproj
-
-      - name: Build
-        run: dotnet build src/services/gateway/LearnFlow.Gateway/LearnFlow.Gateway.csproj --no-restore --configuration Release
-
-      - name: Docker build check
-        run: docker build -f src/services/gateway/Dockerfile -t learnflow-gateway:ci .
+        run: |
+          docker build \
+            -f ${{ matrix.service.path }}/Dockerfile \
+            -t learnflow-${{ matrix.service.name }}:ci-${{ github.sha }} \
+            .
 
   build-frontend:
     name: Build Angular Frontend
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.frontend == 'true' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop'
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: src/frontend/learnflow-app/package-lock.json
 
@@ -187,23 +158,29 @@ jobs:
         working-directory: src/frontend/learnflow-app
         run: npm ci
 
-      - name: Build
+      - name: Build production
         working-directory: src/frontend/learnflow-app
         run: npm run build -- --configuration production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/frontend/learnflow-app/dist/
+          retention-days: 7
 
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
     needs:
-      - build-identity
-      - build-courses
-      - build-enrollments
-      - build-progress
-      - build-certificates
-      - build-search
-      - build-notifications
-      - build-gateway
+      - build-backend
       - build-frontend
+    if: always()
     steps:
-      - name: All checks passed
-        run: echo "CI passed successfully"
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.build-backend.result }}" == "failure" || "${{ needs.build-frontend.result }}" == "failure" ]]; then
+            echo "CI failed"
+            exit 1
+          fi
+          echo "CI passed successfully"
