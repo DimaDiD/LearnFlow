@@ -49,7 +49,6 @@ jobs:
       - name: Build matrix from changes
         id: set-matrix
         run: |
-          # Повний опис усіх сервісів
           declare -A services=(
             [identity]="Identity Service|src/services/identity|LearnFlow.Identity.API"
             [courses]="Courses Service|src/services/courses|LearnFlow.Courses.API"
@@ -61,7 +60,6 @@ jobs:
             [gateway]="API Gateway|src/services/gateway|LearnFlow.Gateway"
           )
 
-          # Чи треба білдити все? (зміна shared, push в main/develop)
           BUILD_ALL=false
           if [[ "${{ steps.changes.outputs.shared }}" == "true" ]]; then
             BUILD_ALL=true
@@ -69,8 +67,7 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/develop" ]]; then
             BUILD_ALL=true
           fi
-
-          # Які сервіси змінились
+          
           declare -A changed=(
             [identity]="${{ steps.changes.outputs.identity }}"
             [courses]="${{ steps.changes.outputs.courses }}"
@@ -82,7 +79,6 @@ jobs:
             [gateway]="${{ steps.changes.outputs.gateway }}"
           )
 
-          # Будуємо JSON масив
           items=()
           for name in "${!services[@]}"; do
             if [[ "$BUILD_ALL" == "true" || "${changed[$name]}" == "true" ]]; then
@@ -91,7 +87,6 @@ jobs:
             fi
           done
 
-          # Збираємо в JSON
           if [ ${#items[@]} -eq 0 ]; then
             echo "matrix={\"service\":[]}" >> $GITHUB_OUTPUT
             echo "empty=true" >> $GITHUB_OUTPUT
@@ -198,7 +193,6 @@ jobs:
           echo "Backend: $backend"
           echo "Frontend: $frontend"
 
-          # failure = провал. success/skipped = ок
           if [[ "$backend" == "failure" || "$frontend" == "failure" ]]; then
             echo "CI failed"
             exit 1
