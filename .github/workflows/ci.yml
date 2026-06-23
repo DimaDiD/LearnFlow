@@ -136,6 +136,23 @@ jobs:
             --no-restore \
             --configuration Release
 
+      - name: Test
+        run: |
+          TEST_PROJECTS=$(find ${{ matrix.service.path }}/tests -name "*.csproj" 2>/dev/null || true)
+
+          if [ -z "$TEST_PROJECTS" ]; then
+            echo "No tests found for ${{ matrix.service.name }} — skipping"
+            exit 0
+          fi
+
+          echo "Found test projects:"
+          echo "$TEST_PROJECTS"
+
+          echo "$TEST_PROJECTS" | while read -r project; do
+            echo "Running tests in $project"
+            dotnet test "$project" --configuration Release --verbosity normal
+          done
+
       - name: Docker build check
         run: |
           docker build \
