@@ -5,4 +5,6 @@
   <Project Path="LearnFlow.Progress.Application/LearnFlow.Progress.Application.csproj" />
   <Project Path="LearnFlow.Progress.Domain/LearnFlow.Progress.Domain.csproj" />
   <Project Path="LearnFlow.Progress.Infrastructure/LearnFlow.Progress.Infrastructure.csproj" />
+  <Project Path="tests/LearnFlow.Progress.IntegrationTests/LearnFlow.Progress.IntegrationTests.csproj" />
+  <Project Path="tests/LearnFlow.Progress.UnitTests/LearnFlow.Progress.UnitTests.csproj" />
 </Solution>
