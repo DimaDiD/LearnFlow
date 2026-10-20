@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LearnFlow — UI prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#121A2B; --paper:#F2F4F1; --surface:#FFFFFF; --signal:#2F6F5E; --signal-soft:#E4EFEA;
+  --mark:#C8862A; --mark-soft:#F7EEDC; --muted:#67707F; --line:#D8DCD6; --danger:#A33428; --danger-soft:#F7E6E3;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8EBE6; --paper:#11161C; --surface:#182028; --signal:#6FBFA3; --signal-soft:#1D3A32;
+    --mark:#E0AE62; --mark-soft:#3A2E1B; --muted:#9BA5AF; --line:#2B3640; --danger:#E08C80; --danger-soft:#3A221F;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8EBE6; --paper:#11161C; --surface:#182028; --signal:#6FBFA3; --signal-soft:#1D3A32;
+  --mark:#E0AE62; --mark-soft:#3A2E1B; --muted:#9BA5AF; --line:#2B3640; --danger:#E08C80; --danger-soft:#3A221F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;line-height:1.25}
+h1{font-size:1.9rem} h2{font-size:1.3rem} h3{font-size:1.05rem}
+p{margin:0 0 .7rem}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* prototype chrome */
+.proto{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;
+  padding:.5rem .9rem;background:var(--ink);color:var(--paper);font-size:.8rem}
+.proto b{font-weight:600;letter-spacing:.01em}
+.proto .sp{flex:1}
+.roles{display:flex;gap:.25rem;background:rgba(255,255,255,.08);padding:.2rem;border-radius:.4rem}
+.roles button{background:none;border:0;color:inherit;padding:.25rem .55rem;border-radius:.3rem;opacity:.7;font-size:.8rem}
+.roles button[aria-pressed="true"]{background:var(--paper);color:var(--ink);opacity:1;font-weight:600}
+
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:70vh;max-width:1240px;margin:0 auto}
+nav.rail{border-right:1px solid var(--line);padding:1.4rem 1rem 3rem}
+.brand{font-family:var(--serif);font-size:1.25rem;font-weight:600;letter-spacing:-.01em;margin-bottom:.15rem}
+.brand small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--muted);letter-spacing:.02em}
+.navgroup{margin-top:1.6rem}
+.navgroup span{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.4rem}
+.rail a{display:block;padding:.38rem .5rem;border-radius:.35rem;text-decoration:none;font-size:.92rem;border-left:2px solid transparent}
+.rail a:hover{background:var(--signal-soft)}
+.rail a[aria-current="page"]{border-left-color:var(--signal);background:var(--signal-soft);font-weight:500}
+main{padding:1.6rem 1.8rem 4rem;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.sub{color:var(--muted);font-size:.9rem}
+
+/* controls */
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:.45rem .9rem;border-radius:.35rem;font-size:.9rem}
+.btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
+:root[data-theme="dark"] .btn.primary,:root:not([data-theme="light"]) .btn.primary{color:#0D1A16}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.small{padding:.25rem .6rem;font-size:.82rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:.35rem;padding:.45rem .6rem;width:100%}
+label{display:block;font-size:.84rem;color:var(--muted);margin:.7rem 0 .25rem}
+.row{display:flex;gap:.7rem;flex-wrap:wrap}
+.row>*{flex:1;min-width:150px}
+
+/* course list */
+.list{border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:1fr auto;gap:.6rem 1.2rem;padding:1rem .2rem;border-bottom:1px solid var(--line);align-items:center}
+.item h3{font-size:1.08rem}
+.meta{font-size:.82rem;color:var(--muted);margin-top:.15rem}
+.pill{display:inline-block;font-size:.74rem;padding:.1rem .45rem;border-radius:.3rem;border:1px solid var(--line);color:var(--muted)}
+.pill.on{background:var(--signal-soft);border-color:transparent;color:var(--signal);font-weight:500}
+.pill.draft{background:transparent}
+.pill.mark{background:var(--mark-soft);border-color:transparent;color:var(--mark);font-weight:500}
+.bar{height:3px;background:var(--line);border-radius:2px;margin-top:.5rem;max-width:320px}
+.bar i{display:block;height:100%;background:var(--signal);border-radius:2px;transition:width .3s ease}
+
+/* search */
+.searchbar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end;padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:.5rem}
+.searchbar .grow{flex:3;min-width:220px}
+.searchbar .f{flex:1;min-width:130px}
+
+/* player */
+.player{display:grid;grid-template-columns:270px 1fr;gap:2rem}
+.modrail{border-left:2px solid var(--line);padding-left:0}
+.mod{margin-bottom:1.1rem}
+.mod h4{margin:0 0 .3rem;font-family:var(--sans);font-size:.78rem;color:var(--muted);font-weight:500;padding-left:1rem}
+.lesson{display:flex;gap:.55rem;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:.32rem 1rem;color:inherit;border-left:2px solid transparent;margin-left:-2px;font-size:.92rem}
+.lesson:hover{background:var(--signal-soft)}
+.lesson[aria-current="true"]{border-left-color:var(--signal);font-weight:500}
+.tick{width:.95rem;flex:0 0 auto;color:var(--signal)}
+.lesson.done span.t{color:var(--muted)}
+.lessonbody{font-family:var(--serif);font-size:1.02rem;max-width:62ch}
+.lessonbody p{margin-bottom:.9rem}
+
+/* misc blocks */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;padding:1.1rem 1.2rem}
+.cert{border-left:3px solid var(--mark);background:var(--surface);padding:.9rem 1.1rem;margin-bottom:.7rem}
+.cert b{font-family:var(--serif);font-size:1.05rem;font-weight:500;display:block}
+.empty{border:1px dashed var(--line);border-radius:.5rem;padding:2rem;text-align:center;color:var(--muted)}
+.empty .btn{margin-top:.8rem}
+.note{font-size:.85rem;color:var(--muted);border-left:2px solid var(--line);padding-left:.7rem;margin:.8rem 0}
+.err{background:var(--danger-soft);color:var(--danger);border-radius:.35rem;padding:.6rem .8rem;font-size:.88rem;margin-bottom:.8rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:.55rem .4rem;border-bottom:1px solid var(--line)}
+th{font-size:.78rem;color:var(--muted);font-weight:500}
+.auth{max-width:380px;margin:2.5rem auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));
+  background:var(--ink);color:var(--paper);padding:.6rem 1rem;border-radius:.4rem;font-size:.88rem;z-index:60;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast.mark{background:var(--mark);color:#20170A}
+.scroll{overflow-x:auto}
+@media (max-width:820px){
+  .shell{grid-template-columns:1fr}
+  nav.rail{border-right:0;border-bottom:1px solid var(--line);padding-bottom:.8rem}
+  .navgroup{margin-top:1rem}
+  .rail .links{display:flex;flex-wrap:wrap;gap:.2rem}
+  main{padding:1.2rem 1rem 3rem}
+  .player{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="proto">
+  <b>LearnFlow</b> <span>UI prototype</span>
+  <span class="sp"></span>
+  <span>View as</span>
+  <div class="roles" id="roles">
+    <button data-role="guest" aria-pressed="true">Guest</button>
+    <button data-role="student" aria-pressed="false">Student</button>
+    <button data-role="instructor" aria-pressed="false">Instructor</button>
+    <button data-role="admin" aria-pressed="false">Admin</button>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="rail" id="rail"></nav>
+  <main id="view"></main>
+</div>
+
+<script>
+const S = {
+  role:"guest",
+  route:"#/catalog",
+  query:"", category:"all", level:"all", sort:"relevance",
+  openCourse:"c1", openLesson:null, builderCourse:"c4",
+  courses:[
+    {id:"c1",title:"Clean Architecture in .NET",instructor:"Olena Hrytsenko",category:"Backend",level:"Advanced",
+     summary:"Build services whose business rules survive a change of database, framework or delivery mechanism.",
+     status:"published",published:"12 Mar 2026",
+     modules:[
+       {title:"Foundations",lessons:[{id:"l1",title:"Why layering fails in practice",min:12},{id:"l2",title:"The dependency rule",min:18},{id:"l3",title:"Entities and use cases",min:15}]},
+       {title:"Putting it to work",lessons:[{id:"l4",title:"Ports and adapters in ASP.NET Core",min:22},{id:"l5",title:"Testing without the database",min:17}]}]},
+    {id:"c2",title:"MongoDB for relational developers",instructor:"Andrii Koval",category:"Data",level:"Intermediate",
+     summary:"Unlearn the join. Model documents around the questions your application actually asks.",
+     status:"published",published:"02 Apr 2026",
+     modules:[
+       {title:"Thinking in documents",lessons:[{id:"m1",title:"Collections, documents, fields",min:10},{id:"m2",title:"Embed or reference",min:20}]},
+       {title:"Working with data",lessons:[{id:"m3",title:"Indexes that matter",min:16},{id:"m4",title:"Aggregation basics",min:19}]}]},
+    {id:"c3",title:"Message-driven services with RabbitMQ",instructor:"Olena Hrytsenko",category:"Backend",level:"Intermediate",
+     summary:"Events, retries, dead letters and the duplicate message that arrives twice on a Friday night.",
+     status:"published",published:"18 Apr 2026",
+     modules:[{title:"The broker",lessons:[{id:"r1",title:"Exchanges, queues, bindings",min:14},{id:"r2",title:"At-least-once delivery",min:13}]},
+              {title:"Surviving production",lessons:[{id:"r3",title:"Idempotent consumers",min:21},{id:"r4",title:"Dead letter queues",min:12}]}]},
+    {id:"c4",title:"Search that users trust",instructor:"You",category:"Data",level:"Beginner",
+     summary:"",status:"draft",published:null,
+     modules:[{title:"Indexing",lessons:[{id:"s1",title:"Mapping fields on purpose",min:15}]}]}
+  ],
+  enrolled:{ c1:["l1","l2"] },
+  certificates:[]
+};
+
+const esc = s => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const course = id => S.courses.find(c=>c.id===id);
+const lessons = c => c.modules.flatMap(m=>m.lessons);
+const doneCount = id => (S.enrolled[id]||[]).length;
+const pct = c => Math.round(doneCount(c.id)/lessons(c).length*100);
+
+function toast(msg,kind){
+  document.querySelectorAll(".toast").forEach(t=>t.remove());
+  const t=document.createElement("div");
+  t.className="toast"+(kind?" "+kind:""); t.textContent=msg; t.setAttribute("role","status");
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+
+const NAV = {
+  guest:[["#/catalog","Browse courses"],["#/search","Search"],["#/signin","Sign in"],["#/register","Create account"]],
+  student:[["#/catalog","Browse courses"],["#/search","Search"],["#/my","My courses"],["#/certificates","My certificates"]],
+  instructor:[["#/teach","My courses"],["#/builder","Course builder"],["#/students","Students"],["#/catalog","Browse courses"]],
+  admin:[["#/users","People"],["#/moderation","Course moderation"],["#/health","Service health"],["#/catalog","Browse courses"]]
+};
+
+function renderRail(){
+  const links = NAV[S.role].map(([h,l])=>
+    `<a href="${h}" ${S.route.startsWith(h)?'aria-current="page"':""}>${l}</a>`).join("");
+  document.getElementById("rail").innerHTML =
+    `<div class="brand">LearnFlow<small>${S.role==="guest"?"not signed in":"signed in as "+S.role}</small></div>
+     <div class="navgroup"><span>${S.role==="guest"?"Catalog":S.role==="instructor"?"Teaching":S.role==="admin"?"Administration":"Learning"}</span>
+     <div class="links">${links}</div></div>`;
+}
+
+/* ---------- screens ---------- */
+function catalog(){
+  const pub = S.courses.filter(c=>c.status==="published");
+  return `<div class="head"><div><h1>Courses</h1><p class="sub">${pub.length} published courses</p></div>
+    <a class="btn ghost small" href="#/search">Search with filters</a></div>
+    <div class="list">${pub.map(cardRow).join("")}</div>`;
+}
+function cardRow(c){
+  return `<article class="item">
+    <div><h3>${esc(c.title)}</h3>
+      <div class="meta">${esc(c.instructor)} · ${c.modules.length} modules · ${lessons(c).length} lessons · ${c.level}</div>
+      <p class="sub" style="margin:.4rem 0 0;max-width:62ch">${esc(c.summary)}</p></div>
+    <div><button class="btn ghost small" data-go="#/course/${c.id}">Open course</button></div>
+  </article>`;
+}
+function search(){
+  let r = S.courses.filter(c=>c.status==="published");
+  const q=S.query.trim().toLowerCase();
+  if(q) r=r.filter(c=>(c.title+" "+c.summary).toLowerCase().includes(q))
+          .sort((a,b)=>(b.title.toLowerCase().includes(q)?1:0)-(a.title.toLowerCase().includes(q)?1:0));
+  if(S.category!=="all") r=r.filter(c=>c.category===S.category);
+  if(S.level!=="all") r=r.filter(c=>c.level===S.level);
+  if(S.sort==="newest") r=[...r].reverse();
+  return `<div class="head"><div><h1>Search</h1><p class="sub">Matches in the title rank above matches in the description</p></div></div>
+  <div class="searchbar">
+    <div class="grow"><label for="q">Search courses</label><input id="q" value="${esc(S.query)}" placeholder="rabbitmq, architecture, indexes"></div>
+    <div class="f"><label for="cat">Category</label><select id="cat">${["all","Backend","Data"].map(v=>`<option ${S.category===v?"selected":""}>${v}</option>`).join("")}</select></div>
+    <div class="f"><label for="lvl">Level</label><select id="lvl">${["all","Beginner","Intermediate","Advanced"].map(v=>`<option ${S.level===v?"selected":""}>${v}</option>`).join("")}</select></div>
+    <div class="f"><label for="sort">Sort by</label><select id="sort"><option value="relevance" ${S.sort==="relevance"?"selected":""}>Relevance</option><option value="newest" ${S.sort==="newest"?"selected":""}>Newest</option></select></div>
+  </div>
+  ${r.length?`<p class="sub" style="margin:1rem 0 .2rem">${r.length} ${r.length===1?"course":"courses"} found</p><div class="list">${r.map(cardRow).join("")}</div>`
+   :`<div class="empty" style="margin-top:1.2rem">Nothing matches “${esc(S.query)}” with these filters.<br>Try a broader term or clear the filters.
+     <div><button class="btn ghost small" data-act="clearfilters">Clear filters</button></div></div>`}`;
+}
+function coursePage(){
+  const c=course(S.openCourse); if(!c) return `<p>Course not found.</p>`;
+  const joined = !!S.enrolled[c.id];
+  return `<div class="head"><div>
+      <p class="sub">${esc(c.category)} · ${c.level}</p>
+      <h1>${esc(c.title)}</h1>
+      <p class="sub">${esc(c.instructor)} · published ${c.published||"—"}</p></div>
+    <div>${S.role==="guest"
+      ? `<button class="btn primary" data-go="#/signin">Sign in to enroll</button>`
+      : joined ? `<button class="btn primary" data-go="#/learn/${c.id}">Continue learning</button>`
+               : `<button class="btn primary" data-act="enroll" data-id="${c.id}">Enroll</button>`}</div></div>
+    <p style="max-width:62ch">${esc(c.summary)}</p>
+    <h2 style="margin:1.6rem 0 .6rem">What the course covers</h2>
+    ${c.modules.map((m,i)=>`<div class="mod" style="padding-left:0">
+       <h4 style="padding-left:0">Module ${i+1} · ${esc(m.title)}</h4>
+       <ul style="margin:.2rem 0 .9rem;padding-left:1.1rem">${m.lessons.map(l=>`<li>${esc(l.title)} <span class="sub">· ${l.min} min</span></li>`).join("")}</ul></div>`).join("")}`;
+}
+function myCourses(){
+  const ids=Object.keys(S.enrolled);
+  if(!ids.length) return `<div class="head"><h1>My courses</h1></div>
+    <div class="empty">You have not enrolled in anything yet.<br>Pick a course from the catalog and it will show up here.
+    <div><button class="btn primary" data-go="#/catalog">Browse courses</button></div></div>`;
+  return `<div class="head"><div><h1>My courses</h1><p class="sub">${ids.length} in progress</p></div></div>
+  <div class="list">${ids.map(id=>{const c=course(id);const p=pct(c);return `<article class="item">
+    <div><h3>${esc(c.title)}</h3><div class="meta">${esc(c.instructor)} · ${doneCount(id)} of ${lessons(c).length} lessons</div>
+      <div class="bar"><i style="width:${p}%"></i></div></div>
+    <div><button class="btn ghost small" data-go="#/learn/${id}">${p===100?"Review":"Continue"}</button></div></article>`}).join("")}</div>`;
+}
+function player(){
+  const c=course(S.openCourse); const done=S.enrolled[c.id]||[];
+  const all=lessons(c); const cur=all.find(l=>l.id===S.openLesson)||all.find(l=>!done.includes(l.id))||all[0];
+  const p=pct(c);
+  return `<div class="head"><div><p class="sub">${esc(c.instructor)}</p><h1>${esc(c.title)}</h1>
+    <div class="bar" style="max-width:420px"><i style="width:${p}%"></i></div>
+    <p class="sub" style="margin-top:.35rem">${done.length} of ${all.length} lessons complete${p===100?" · course finished":""}</p></div></div>
+  <div class="player">
+    <aside class="modrail">${c.modules.map((m,i)=>`<div class="mod"><h4>Module ${i+1} · ${esc(m.title)}</h4>
+      ${m.lessons.map(l=>{const d=done.includes(l.id);return `<button class="lesson ${d?"done":""}" data-act="open" data-id="${l.id}" ${l.id===cur.id?'aria-current="true"':""}>
+        <span class="tick">${d?"✓":"·"}</span><span class="t">${esc(l.title)}</span></button>`}).join("")}</div>`).join("")}
+    </aside>
+    <section>
+      <h2>${esc(cur.title)}</h2>
+      <p class="sub">${cur.min} min</p>
+      <div class="lessonbody">
+        <p>This prototype stands in for the lesson content. In the product this area holds the text of the lesson, code samples and links to further reading.</p>
+        <p>Marking a lesson complete updates the progress bar above. When the last lesson of the course is marked, a certificate is issued automatically and an email is sent — the student does not have to request anything.</p>
+      </div>
+      ${done.includes(cur.id)
+        ? `<button class="btn ghost" disabled>Lesson complete</button>`
+        : `<button class="btn primary" data-act="complete" data-id="${cur.id}">Mark lesson complete</button>`}
+      <p class="note">Marking the same lesson twice changes nothing — the interface mirrors the idempotency rule the services follow.</p>
+    </section></div>`;
+}
+function certificates(){
+  if(!S.certificates.length) return `<div class="head"><h1>My certificates</h1></div>
+    <div class="empty">No certificates yet.<br>Finish every lesson of a course and the certificate appears here on its own.</div>`;
+  return `<div class="head"><div><h1>My certificates</h1><p class="sub">${S.certificates.length} issued</p></div></div>
+    ${S.certificates.map(c=>`<div class="cert"><b>${esc(c.title)}</b>
+      <div class="meta">${esc(c.number)} · issued ${esc(c.date)}</div>
+      <div style="margin-top:.5rem"><button class="btn ghost small" data-act="verify" data-id="${esc(c.number)}">Copy verification link</button></div></div>`).join("")}`;
+}
+function teach(){
+  return `<div class="head"><div><h1>My courses</h1><p class="sub">Drafts are visible only to you</p></div>
+    <button class="btn primary" data-go="#/builder">New course</button></div>
+  <div class="list">${S.courses.filter(c=>c.instructor==="You"||c.instructor==="Olena Hrytsenko").map(c=>`<article class="item">
+    <div><h3>${esc(c.title)}</h3><div class="meta">${c.modules.length} modules · ${lessons(c).length} lessons</div>
+      <div style="margin-top:.4rem"><span class="pill ${c.status==="published"?"on":"draft"}">${c.status}</span>
+      ${c.status==="published"?`<span class="pill">${doneCount(c.id)?"1 student":"0 students"}</span>`:""}</div></div>
+    <div>${c.status==="draft"
+      ? `<button class="btn ghost small" data-go="#/builder">Edit</button>`
+      : `<button class="btn ghost small" data-go="#/students">View students</button>`}</div></article>`).join("")}</div>`;
+}
+function builder(){
+  const c=course(S.builderCourse);
+  const empty=lessons(c).length===0;
+  return `<div class="head"><div><p class="sub">Draft</p><h1>${esc(c.title)}</h1></div>
+    <div><button class="btn primary" data-act="publish" data-id="${c.id}">Publish course</button></div></div>
+  <div class="panel" style="margin-bottom:1.2rem">
+    <div class="row"><div><label for="t">Course title</label><input id="t" value="${esc(c.title)}"></div>
+      <div><label for="cg">Category</label><select id="cg"><option>Data</option><option>Backend</option></select></div>
+      <div><label for="lv">Level</label><select id="lv"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div></div>
+    <label for="d">Short description</label><textarea id="d" rows="2" placeholder="One or two sentences a student reads before enrolling">${esc(c.summary)}</textarea>
+  </div>
+  <h2>Structure</h2>
+  <p class="sub">A course can be published once it has at least one module with at least one lesson.</p>
+  ${empty?`<div class="empty" style="margin-top:.8rem">No modules yet. Start with a module, then add lessons to it.</div>`:""}
+  ${c.modules.map((m,i)=>`<div class="panel" style="margin-top:.8rem">
+     <div class="head" style="margin-bottom:.5rem"><h3>Module ${i+1} · ${esc(m.title)}</h3>
+       <button class="btn ghost small" data-act="addlesson" data-id="${i}">Add lesson</button></div>
+     ${m.lessons.length?`<ol style="margin:.2rem 0;padding-left:1.1rem">${m.lessons.map(l=>`<li>${esc(l.title)} <span class="sub">· ${l.min} min</span></li>`).join("")}</ol>`
+       :`<p class="sub">This module has no lessons yet.</p>`}</div>`).join("")}
+  <div style="margin-top:.9rem"><button class="btn ghost small" data-act="addmodule">Add module</button></div>`;
+}
+function students(){
+  return `<div class="head"><div><h1>Students</h1><p class="sub">Clean Architecture in .NET</p></div></div>
+  <div class="scroll"><table><thead><tr><th>Student</th><th>Enrolled</th><th>Progress</th><th>Last activity</th></tr></thead><tbody>
+    <tr><td>Dmytro D.</td><td>02 Oct 2026</td><td>${pct(course("c1"))}%</td><td>today</td></tr>
+    <tr><td>Iryna M.</td><td>28 Sep 2026</td><td>60%</td><td>2 days ago</td></tr>
+    <tr><td>Pavlo S.</td><td>21 Sep 2026</td><td>100%</td><td>5 days ago</td></tr>
+  </tbody></table></div>
+  <p class="note">Progress numbers come from the progress service, not from the course service — the two are joined in the interface, never in the database.</p>`;
+}
+function users(){
+  return `<div class="head"><div><h1>People</h1><p class="sub">3 accounts</p></div><input style="max-width:220px" placeholder="Find by email"></div>
+  <div class="scroll"><table><thead><tr><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead><tbody>
+  ${[["olena@learnflow.io","Instructor","11 Mar 2026"],["dmytro@learnflow.io","Student","02 Oct 2026"],["admin@learnflow.io","Admin","01 Mar 2026"]]
+    .map(([e,r,d])=>`<tr><td>${e}</td><td><span class="pill">${r}</span></td><td>${d}</td>
+      <td style="text-align:right"><button class="btn ghost small" data-act="role">Change role</button></td></tr>`).join("")}
+  </tbody></table></div>
+  <p class="note">A role change takes effect when the person's access token is next renewed, within fifteen minutes.</p>`;
+}
+function moderation(){
+  return `<div class="head"><div><h1>Course moderation</h1><p class="sub">Every course on the platform</p></div></div>
+  <div class="scroll"><table><thead><tr><th>Course</th><th>Instructor</th><th>Status</th><th></th></tr></thead><tbody>
+  ${S.courses.map(c=>`<tr><td>${esc(c.title)}</td><td>${esc(c.instructor)}</td>
+    <td><span class="pill ${c.status==="published"?"on":""}">${c.status}</span></td>
+    <td style="text-align:right">${c.status==="published"?`<button class="btn ghost small" data-act="archive" data-id="${c.id}">Archive</button>`:""}</td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+function health(){
+  const svc=[["Identity","healthy"],["Course","healthy"],["Enrollment","healthy"],["Progress","healthy"],
+             ["Search","degraded"],["Certificate","healthy"],["Notification","healthy"]];
+  return `<div class="head"><div><h1>Service health</h1><p class="sub">Readiness reported by each service</p></div></div>
+  <div class="scroll"><table><thead><tr><th>Service</th><th>State</th><th>Checked</th></tr></thead><tbody>
+  ${svc.map(([n,s])=>`<tr><td>${n}</td><td><span class="pill ${s==="healthy"?"on":"mark"}">${s}</span></td><td>just now</td></tr>`).join("")}
+  </tbody></table></div>
+  <p class="note">Search is degraded: the index is behind. Course publishing keeps working and the index catches up on its own — only search results may be a few seconds stale.</p>`;
+}
+function signin(){
+  return `<div class="auth"><h1>Sign in</h1><p class="sub">Use any email to move around the prototype.</p>
+    <label for="e">Email</label><input id="e" type="email" value="dmytro@learnflow.io">
+    <label for="p">Password</label><input id="p" type="password" value="prototype">
+    <div style="margin-top:1rem"><button class="btn primary" data-act="signin">Sign in</button>
+    <button class="btn ghost" data-go="#/register">Create account</button></div>
+    <p class="note">The prototype signs you in as a student. Switch roles with the control at the top of the page.</p></div>`;
+}
+function register(){
+  return `<div class="auth"><h1>Create account</h1>
+    <label for="re">Email</label><input id="re" type="email" placeholder="you@example.com">
+    <label for="rp">Password</label><input id="rp" type="password" placeholder="At least 8 characters, one digit">
+    <label for="rr">I am joining as</label>
+    <select id="rr"><option>Student — I want to take courses</option><option>Instructor — I want to publish courses</option></select>
+    <div style="margin-top:1rem"><button class="btn primary" data-act="signin">Create account</button></div>
+    <p class="note">The role is chosen once at sign-up and shapes the whole interface afterwards. An administrator can change it later.</p></div>`;
+}
+
+function render(){
+  renderRail();
+  const r=S.route; let html;
+  if(r.startsWith("#/course/")){S.openCourse=r.split("/")[2];html=coursePage();}
+  else if(r.startsWith("#/learn/")){S.openCourse=r.split("/")[2];html=player();}
+  else html = ({"#/catalog":catalog,"#/search":search,"#/my":myCourses,"#/certificates":certificates,
+    "#/teach":teach,"#/builder":builder,"#/students":students,"#/users":users,"#/moderation":moderation,
+    "#/health":health,"#/signin":signin,"#/register":register}[r]||catalog)();
+  document.getElementById("view").innerHTML=html;
+  const q=document.getElementById("q"); if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}
+}
+function go(route){S.route=route;if(location.hash!==route)location.hash=route;else render();}
+
+/* ---------- behaviour ---------- */
+document.addEventListener("click",e=>{
+  const roleBtn=e.target.closest("#roles button");
+  if(roleBtn){
+    S.role=roleBtn.dataset.role;
+    document.querySelectorAll("#roles button").forEach(b=>b.setAttribute("aria-pressed",String(b===roleBtn)));
+    go(NAV[S.role][0][0]); return;
+  }
+  const goBtn=e.target.closest("[data-go]"); if(goBtn){go(goBtn.dataset.go);return;}
+  const act=e.target.closest("[data-act]"); if(!act) return;
+  const id=act.dataset.id;
+  switch(act.dataset.act){
+    case "signin": S.role="student";
+      document.querySelectorAll("#roles button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.role==="student")));
+      toast("Signed in"); go("#/my"); break;
+    case "enroll":
+      if(S.role==="guest"){go("#/signin");break;}
+      if(S.enrolled[id]){toast("You are already enrolled in this course");go("#/learn/"+id);break;}
+      S.enrolled[id]=[]; toast("Enrolled — confirmation email sent"); go("#/learn/"+id); break;
+    case "open": S.openLesson=id; render(); break;
+    case "complete": {
+      const c=course(S.openCourse); const done=S.enrolled[c.id];
+      if(!done.includes(id)) done.push(id);
+      const all=lessons(c); const next=all.find(l=>!done.includes(l.id));
+      S.openLesson=next?next.id:id;
+      render();
+      if(!next && !S.certificates.some(x=>x.courseId===c.id)){
+        toast("Last lesson complete — issuing your certificate");
+        setTimeout(()=>{
+          S.certificates.push({courseId:c.id,title:c.title,number:"LF-2026-"+Math.random().toString(36).slice(2,10).toUpperCase(),date:"7 Oct 2026"});
+          toast("Certificate issued and emailed to you","mark");
+          if(S.route.startsWith("#/learn/")) render();
+        },1800);
+      }
+      break;
+    }
+    case "verify": toast("Verification link copied: /verify/"+id); break;
+    case "publish": {
+      const c=course(id);
+      if(lessons(c).length===0){
+        const v=document.getElementById("view");
+        if(!v.querySelector(".err")){
+          const d=document.createElement("div"); d.className="err";
+          d.textContent="This course cannot be published yet: add at least one module with at least one lesson.";
+          v.prepend(d);
+        }
+        break;
+      }
+      c.status="published"; c.published="7 Oct 2026"; c.summary=c.summary||"Draft description";
+      toast("Published — it will appear in search within a few seconds");
+      go("#/teach");
+      setTimeout(()=>toast("Indexed — the course is now searchable"),2600);
+      break;
+    }
+    case "addmodule": course(S.builderCourse).modules.push({title:"New module",lessons:[]}); render(); break;
+    case "addlesson": {
+      const m=course(S.builderCourse).modules[Number(id)];
+      m.lessons.push({id:"n"+Date.now(),title:"New lesson",min:10}); render(); break;
+    }
+    case "archive": { const c=course(id); c.status="archived"; toast("Archived — removed from the catalog and search"); render(); break; }
+    case "role": toast("Role updated"); break;
+    case "clearfilters": S.query="";S.category="all";S.level="all";S.sort="relevance"; render(); break;
+  }
+});
+document.addEventListener("input",e=>{
+  if(e.target.id==="q"){S.query=e.target.value;render();}
+});
+document.addEventListener("change",e=>{
+  if(e.target.id==="cat"){S.category=e.target.value;render();}
+  if(e.target.id==="lvl"){S.level=e.target.value;render();}
+  if(e.target.id==="sort"){S.sort=e.target.value;render();}
+});
+window.addEventListener("hashchange",()=>{S.route=location.hash||"#/catalog";render();});
+S.route=location.hash||"#/catalog";
+render();
+</script>
+</body>
+</html>
